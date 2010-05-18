@@ -603,6 +603,11 @@ case "${targ}" in
     targ_selvecs="i386linux_vec i386pei_vec"
     targ64_selvecs="bfd_elf64_x86_64_vec bfd_elf64_l1om_vec"
     ;;
+  i[3-7]86-*-nacl*)
+    targ_defvec=bfd_elf32_nacl_vec
+    targ_selvecs="bfd_elf32_i386_vec i386linux_vec i386pei_vec"
+    targ64_selvecs="bfd_elf64_x86_64_vec bfd_elf64_nacl_vec"
+    ;;
 #ifdef BFD64
   x86_64-*-darwin*)
     targ_defvec=mach_o_le_vec
@@ -640,6 +645,11 @@ case "${targ}" in
     targ_selvecs="x86_64pe_vec x86_64pei_vec bfd_elf64_x86_64_vec bfd_elf64_l1om_vec"
     want64=true
     targ_underscore=yes
+    ;;
+  x86_64-*-nacl*)
+    targ_defvec=bfd_elf64_nacl_vec
+    targ_selvecs="bfd_elf32_i386_vec i386linux_vec i386pei_vec bfd_elf32_nacl_vec x86_64pei_vec"
+    want64=true
     ;;
 #endif
   i[3-7]86-*-lynxos*)

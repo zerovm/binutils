@@ -31,6 +31,10 @@
 
 #include "elf/x86-64.h"
 
+#ifdef ELF64_NACL_C
+#include "elf/nacl.h"
+#endif
+
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
 #define MINUS_ONE (~ (bfd_vma) 0)
 
@@ -372,29 +376,100 @@ elf64_x86_64_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 
 /* The size in bytes of an entry in the procedure linkage table.  */
 
+#ifdef ELF64_NACL_C
+#define PLT_ENTRY_SIZE 64
+#else
 #define PLT_ENTRY_SIZE 16
+#endif
 
 /* The first entry in a procedure linkage table looks like this.  See the
    SVR4 ABI i386 supplement and the x86-64 ABI to see how this works.  */
 
+#ifdef ELF64_NACL_C
+static const bfd_byte elf64_x86_64_plt0_entry[PLT_ENTRY_SIZE] =
+{
+  0xff, 0x35, 8, 0, 0, 0,	/* pushq GOT+8(%rip) */
+#define elf_x86_64_plt0_entry_offset1 2
+#define elf_x86_64_plt0_entry_instsize1 6
+  0x4c, 0x8b, 0x1d, 16, 0, 0, 0,/* movq GOT+16(%rip), %r11 */
+#define elf_x86_64_plt0_entry_offset2 9
+#define elf_x86_64_plt0_entry_instsize2 7
+  0x4d, 0x8b, 0x1b,		/* mov (%r11), %r11 */
+  0x49, 0x83, 0xe3, 0xe0,	/* andq NACLMASK, %r11 */
+  0x41, 0xff, 0xe3,		/* jmp *%r11 */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,	/* fill with hlt instructions. */
+  0xf4				/* fill with hlt instructions. */
+};
+#else
 static const bfd_byte elf64_x86_64_plt0_entry[PLT_ENTRY_SIZE] =
 {
   0xff, 0x35, 8, 0, 0, 0,	/* pushq GOT+8(%rip)  */
+#define elf_x86_64_plt0_entry_offset1 2
+#define elf_x86_64_plt0_entry_instsize1 6
   0xff, 0x25, 16, 0, 0, 0,	/* jmpq *GOT+16(%rip) */
+#define elf_x86_64_plt0_entry_offset2 8
+#define elf_x86_64_plt0_entry_instsize2 6
   0x0f, 0x1f, 0x40, 0x00	/* nopl 0(%rax)       */
 };
+#endif
 
 /* Subsequent entries in a procedure linkage table look like this.  */
 
+#ifdef ELF64_NACL_C
+static const bfd_byte elf64_x86_64_plt_entry[PLT_ENTRY_SIZE] =
+{
+  0x4c, 0x8b, 0x1d,	    /* movq name@GOTPC(%rip), %r11 */
+#define elf_x86_64_plt_entry_offset1 3
+#define elf_x86_64_plt_entry_instsize1 7
+  0, 0, 0, 0,		    /* replaced with offset to this symbol in .got.  */
+  0x4d, 0x8b, 0x1b,	    /* mov (%r11), %r11 */
+  0x49, 0x83, 0xe3, 0xe0,   /* andq NACLMASK, %r11 */
+  0x41, 0xff, 0xe3,	    /* jmp *%r11 */
+  0xf4, 0xf4, 0xf4, 0xf4,   /* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,   /* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,   /* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4,	    /* fill with hlt instructions. */
+#define elf_x86_64_plt_entry_offset2 32
+  0x68,			    /* pushq immediate */
+#define elf_x86_64_plt_entry_offset3 33
+  0, 0, 0, 0,		    /* replaced with index into relocation table.  */
+  0xe9,			    /* jmp relative */
+#define elf_x86_64_plt_entry_offset4 38
+  0, 0, 0, 0,		    /* replaced with offset to start of .plt0.  */
+#define elf_x86_64_plt_entry_offset5 42
+  0xf4, 0xf4, 0xf4, 0xf4,   /* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,   /* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,   /* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,   /* fill with hlt instructions. */
+  0xf4, 0xf4, 0xf4, 0xf4,   /* fill with hlt instructions. */
+  0xf4, 0xf4		    /* fill with hlt instructions. */
+};
+#else
 static const bfd_byte elf64_x86_64_plt_entry[PLT_ENTRY_SIZE] =
 {
   0xff, 0x25,	/* jmpq *name@GOTPC(%rip) */
+#define elf_x86_64_plt_entry_offset1 2
+#define elf_x86_64_plt_entry_instsize1 6
   0, 0, 0, 0,	/* replaced with offset to this symbol in .got.	 */
+#define elf_x86_64_plt_entry_offset2 6
   0x68,		/* pushq immediate */
+#define elf_x86_64_plt_entry_offset3 7
   0, 0, 0, 0,	/* replaced with index into relocation table.  */
   0xe9,		/* jmp relative */
+#define elf_x86_64_plt_entry_offset4 12
   0, 0, 0, 0	/* replaced with offset to start of .plt0.  */
+#define elf_x86_64_plt_entry_offset5 16
 };
+#endif
 
 /* x86-64 ELF linker hash entry.  */
 
@@ -686,6 +761,11 @@ elf64_x86_64_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (!htab->sdynbss
       || (!info->shared && !htab->srelbss))
     abort ();
+
+#ifdef ELF64_NACL_C
+  if (!bfd_set_section_alignment(dynobj, htab->elf.splt, 5))
+    return FALSE;
+#endif
 
   return TRUE;
 }
@@ -3791,25 +3871,28 @@ elf64_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 		       - plt->output_section->vma
 		       - plt->output_offset
 		       - h->plt.offset
-		       - 6),
-		  plt->contents + h->plt.offset + 2);
+		       - elf_x86_64_plt_entry_instsize1),
+		  plt->contents + h->plt.offset + elf_x86_64_plt_entry_offset1);
 
       /* Don't fill PLT entry for static executables.  */
       if (plt == htab->elf.splt)
 	{
 	  /* Put relocation index.  */
 	  bfd_put_32 (output_bfd, plt_index,
-		      plt->contents + h->plt.offset + 7);
+		      (plt->contents + h->plt.offset
+		       + elf_x86_64_plt_entry_offset3));
 	  /* Put offset for jmp .PLT0.  */
-	  bfd_put_32 (output_bfd, - (h->plt.offset + PLT_ENTRY_SIZE),
-		      plt->contents + h->plt.offset + 12);
+	  bfd_put_32 (output_bfd,
+		      - (h->plt.offset + elf_x86_64_plt_entry_offset5),
+		      (plt->contents + h->plt.offset
+		       + elf_x86_64_plt_entry_offset4));
 	}
 
       /* Fill in the entry in the global offset table, initially this
 	 points to the pushq instruction in the PLT which is at offset 6.  */
       bfd_put_64 (output_bfd, (plt->output_section->vma
 			       + plt->output_offset
-			       + h->plt.offset + 6),
+			       + h->plt.offset + elf_x86_64_plt_entry_offset2),
 		  gotplt->contents + got_offset);
 
       /* Fill in the entry in the .rela.plt section.  */
@@ -4086,8 +4169,8 @@ elf64_x86_64_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *inf
 		       + 8
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
-		       - 6),
-		      htab->elf.splt->contents + 2);
+		       - elf_x86_64_plt0_entry_instsize1),
+		      htab->elf.splt->contents + elf_x86_64_plt0_entry_offset1);
 	  /* Add offset for jmp *GOT+16(%rip). The 12 is the offset to
 	     the end of the instruction.  */
 	  bfd_put_32 (output_bfd,
@@ -4096,8 +4179,9 @@ elf64_x86_64_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *inf
 		       + 16
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
-		       - 12),
-		      htab->elf.splt->contents + 8);
+		       - elf_x86_64_plt0_entry_instsize1
+		       - elf_x86_64_plt0_entry_instsize2),
+		      htab->elf.splt->contents + elf_x86_64_plt0_entry_offset2);
 
 	  elf_section_data (htab->elf.splt->output_section)->this_hdr.sh_entsize =
 	    PLT_ENTRY_SIZE;
@@ -4120,8 +4204,9 @@ elf64_x86_64_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *inf
 			   - htab->elf.splt->output_section->vma
 			   - htab->elf.splt->output_offset
 			   - htab->tlsdesc_plt
-			   - 6),
-			  htab->elf.splt->contents + htab->tlsdesc_plt + 2);
+			   - elf_x86_64_plt0_entry_instsize1),
+			  (htab->elf.splt->contents + htab->tlsdesc_plt
+			   + elf_x86_64_plt0_entry_offset1));
 	      /* Add offset for jmp *GOT+TDG(%rip), where TGD stands for
 		 htab->tlsdesc_got. The 12 is the offset to the end of
 		 the instruction.  */
@@ -4132,8 +4217,10 @@ elf64_x86_64_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *inf
 			   - htab->elf.splt->output_section->vma
 			   - htab->elf.splt->output_offset
 			   - htab->tlsdesc_plt
-			   - 12),
-			  htab->elf.splt->contents + htab->tlsdesc_plt + 8);
+			   - elf_x86_64_plt0_entry_instsize1
+			   - elf_x86_64_plt0_entry_instsize2),
+			  (htab->elf.splt->contents + htab->tlsdesc_plt
+			   + elf_x86_64_plt0_entry_offset2));
 	    }
 	}
     }
@@ -4397,13 +4484,26 @@ static const struct bfd_elf_special_section
   { NULL,	                0,          0, 0,            0 }
 };
 
+#ifdef ELF64_NACL_C
+#define TARGET_LITTLE_SYM		    bfd_elf64_nacl_vec
+#define TARGET_LITTLE_NAME		    "elf64-nacl"
+/* NativeClient defines its own ABI.*/
+#undef ELF_OSABI
+#define ELF_OSABI ELFOSABI_NACL
+#else
 #define TARGET_LITTLE_SYM		    bfd_elf64_x86_64_vec
 #define TARGET_LITTLE_NAME		    "elf64-x86-64"
+#endif
 #define ELF_ARCH			    bfd_arch_i386
 #define ELF_MACHINE_CODE		    EM_X86_64
 #define ELF_MAXPAGESIZE			    0x200000
+#ifdef ELF64_NACL_C
+#define ELF_MINPAGESIZE			    0x10000
+#define ELF_COMMONPAGESIZE		    0x10000
+#else
 #define ELF_MINPAGESIZE			    0x1000
 #define ELF_COMMONPAGESIZE		    0x1000
+#endif
 
 #define elf_backend_can_gc_sections	    1
 #define elf_backend_can_refcount	    1
@@ -4470,6 +4570,63 @@ static const struct bfd_elf_special_section
 #undef  elf_backend_post_process_headers
 #define elf_backend_post_process_headers  _bfd_elf_set_osabi
 
+#ifdef ELF64_NACL_C
+#define bfd_elf64_bfd_merge_private_bfd_data \
+  elf64_nacl_merge_private_bfd_data
+
+static unsigned long previous_ibfd_e_flags = (unsigned long) EF_NACL_ALIGN_LIB;
+static unsigned char previous_ibfd_abiversion = 0;
+
+static bfd_boolean
+elf64_nacl_merge_private_bfd_data (bfd *ibfd,
+                                   bfd *obfd)
+{
+  unsigned long ibfd_e_flags;
+  unsigned char ibfd_abiversion;
+
+  ibfd_e_flags = elf_elfheader (ibfd)->e_flags & EF_NACL_ALIGN_MASK;
+  if ((ibfd_e_flags != EF_NACL_ALIGN_LIB) &&
+      (previous_ibfd_e_flags != EF_NACL_ALIGN_LIB) &&
+      (ibfd_e_flags != previous_ibfd_e_flags)) {
+    (*_bfd_error_handler)
+    (_("%B: linking files with incompatible alignments"), ibfd);
+    bfd_set_error (bfd_error_bad_value);
+    return FALSE;
+  }
+
+  ibfd_abiversion = elf_elfheader (ibfd)->e_ident[EI_ABIVERSION];
+  if (ibfd_abiversion != 0 &&
+      previous_ibfd_abiversion != 0 &&
+      ibfd_abiversion != previous_ibfd_abiversion) {
+    (*_bfd_error_handler)
+    (_("%B: linking files with incompatible abi version"), ibfd);
+    bfd_set_error (bfd_error_bad_value);
+    return FALSE;
+  }
+
+  previous_ibfd_e_flags = ibfd_e_flags;
+  elf_elfheader (obfd)->e_flags |= previous_ibfd_e_flags;
+
+  previous_ibfd_abiversion = ibfd_abiversion;
+  elf_elfheader (obfd)->e_ident[EI_ABIVERSION] = previous_ibfd_abiversion;
+
+  return TRUE;
+}
+
+#define elf_backend_final_write_processing \
+  elf64_nacl_backend_final_write_processing
+
+static void
+elf64_nacl_backend_final_write_processing (bfd *abfd,
+                                           bfd_boolean linker ATTRIBUTE_UNUSED)
+{
+  elf_elfheader (abfd)->e_ident[EI_OSABI] = ELFOSABI_NACL;
+  elf_elfheader (abfd)->e_ident[EI_ABIVERSION] = EF_NACL_ABIVERSION;
+  elf_elfheader (abfd)->e_flags |= previous_ibfd_e_flags;
+}
+
+#include "elf64-target.h"
+#else
 #include "elf64-target.h"
 
 /* FreeBSD support.  */
@@ -4536,3 +4693,4 @@ elf64_l1om_elf_object_p (bfd *abfd)
 #define elf_backend_post_process_headers  _bfd_elf_set_osabi
 
 #include "elf64-target.h"
+#endif

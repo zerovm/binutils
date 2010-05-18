@@ -221,6 +221,7 @@ ALL_EMULATIONS = \
 	eelf_i386_fbsd.o \
 	eelf_i386_ldso.o \
 	eelf_i386_vxworks.o \
+	eelf_nacl.o \
 	eelf_s390.o \
 	egld960.o \
 	egld960coff.o \
@@ -1072,6 +1073,10 @@ eelf64_ia64_fbsd.c: $(srcdir)/emulparams/elf64_ia64_fbsd.sh \
   $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_ia64_fbsd "$(tdir_elf64_ia64_fbsd)"
+eelf64_nacl.c: $(srcdir)/emulparams/elf64_nacl.sh \
+  $(srcdir)/emulparams/elf_x86_64.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64_nacl "$(tdir_elf64_nacl)"
 eelf64_s390.c: $(srcdir)/emulparams/elf64_s390.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_s390 "$(tdir_elf64_s390)"
@@ -1110,6 +1115,10 @@ eelf64ltsmip.c: $(srcdir)/emulparams/elf64ltsmip.sh \
 eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386 "$(tdir_elf_i386)"
+eelf_nacl.c: $(srcdir)/emulparams/elf_nacl.sh \
+  $(srcdir)/emulparams/elf_i386.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_nacl "$(tdir_elf_nacl)"
 eelf_x86_64.c: $(srcdir)/emulparams/elf_x86_64.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_x86_64 "$(tdir_elf_x86_64)"

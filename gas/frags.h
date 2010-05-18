@@ -77,9 +77,21 @@ struct frag {
   unsigned int has_code:1;
   unsigned int insn_addr:6;
 
+  /* NativeClient support:
+   * Set if this fragment contains a call in a native client assembly.  These
+   * need to end an alignment unit.
+   */
+  unsigned int is_call:1;
+
   /* What state is my tail in? */
   relax_stateT fr_type;
   relax_substateT fr_subtype;
+
+  /* NativeClient support:
+   * If this fragment contains a call, we will need to tweak the fixup to
+   * reflect the padding to put the call at the end of the fragment.
+   */
+  fixS *nacl_fixup;
 
 #ifdef USING_CGEN
   /* Don't include this unless using CGEN to keep frag size down.  */

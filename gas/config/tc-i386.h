@@ -297,4 +297,12 @@ void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
 /* X_add_symbol:X_op_symbol (Intel mode only) */
 #define O_full_ptr O_md2
 
+/* NativeClient specific additions. */
+
+/* log2 of the instruction alignment */
+extern int nacl_alignment;
+
+/* library mode: 16-byte alignment, calls end 32-byte chunks. */
+extern int nacl_library_mode;
+
 #endif /* TC_I386 */

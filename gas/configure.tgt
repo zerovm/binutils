@@ -59,6 +59,8 @@ case ${cpu} in
   mips*el)		cpu_type=mips endian=little ;;
   mips*)		cpu_type=mips endian=big ;;
   mt)                   cpu_type=mt endian=big ;;
+  nacl*)		cpu_type=nacl arch=i386 ;;
+  nacl64*)		cpu_type=nacl arch=x86_64 ;;
   or32*)		cpu_type=or32 endian=big ;;
   pjl*)			cpu_type=pj endian=little ;;
   pj*)			cpu_type=pj endian=big ;;
@@ -203,6 +205,7 @@ case ${generic_target} in
   i386-*-linux*coff*)			fmt=coff em=linux ;;
   i386-*-linux-*)			fmt=elf em=linux ;;
   i386-*-lynxos*)			fmt=elf em=lynx ;;
+  i386-*-nacl*)				fmt=elf em=linux cpu_type=nacl;;
   i386-*-sysv[45]*)			fmt=elf ;;
   i386-*-solaris*)			fmt=elf em=solaris ;;
   i386-*-freebsdaout*)			fmt=aout em=386bsd ;;

@@ -69,6 +69,16 @@ frag_alloc (struct obstack *ob)
   (void) obstack_alloc (ob, 0);
   oalign = obstack_alignment_mask (ob);
   obstack_alignment_mask (ob) = 0;
+  {
+    /* If there isn't adequate space for a frag plus its contents plus the
+     * alignment contents in the current chunk, force the allocation of a new
+     * chunk. */
+
+    unsigned space = obstack_room (ob);
+    if (space < (unsigned)SIZEOF_STRUCT_FRAG + (1 << (nacl_alignment + 2))) {
+      (void) obstack_alloc (ob, space-1);
+    }
+  }
   ptr = (fragS *) obstack_alloc (ob, SIZEOF_STRUCT_FRAG);
   obstack_alignment_mask (ob) = oalign;
   memset (ptr, 0, SIZEOF_STRUCT_FRAG);

@@ -608,7 +608,7 @@ ldfile_open_command_file (const char *name)
 void
 ldfile_open_default_command_file (const char *name)
 {
-  ldfile_open_command_file_1 (name, TRUE);
+  ldfile_open_command_file_1 (name, FALSE);
 }
 
 void

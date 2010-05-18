@@ -303,6 +303,7 @@ BFD32_BACKENDS = \
 	elf32-moxie.lo \
 	elf32-msp430.lo \
 	elf32-mt.lo \
+	elf32-nacl.lo \
 	elf32-openrisc.lo \
 	elf32-or32.lo \
 	elf32-pj.lo \
@@ -486,6 +487,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-moxie.c \
 	elf32-msp430.c \
 	elf32-mt.c \
+	elf32-nacl.c \
 	elf32-openrisc.c \
 	elf32-or32.c \
 	elf32-pj.c \
@@ -598,6 +600,7 @@ BFD64_BACKENDS = \
 	elf64-ia64.lo \
 	elf64-mips.lo \
 	elf64-mmix.lo \
+	elf64-nacl.lo \
 	elf64-ppc.lo \
 	elf64-s390.lo \
 	elf64-sh64.lo \
@@ -628,6 +631,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-hppa.c \
 	elf64-mips.c \
 	elf64-mmix.c \
+	elf64-nacl.c \
 	elf64-ppc.c \
 	elf64-s390.c \
 	elf64-sh64.c \

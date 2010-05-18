@@ -75,6 +75,7 @@
 #define ELFOSABI_NSK	     14	/* Hewlett-Packard Non-Stop Kernel */
 #define ELFOSABI_AROS	     15	/* AROS */
 #define ELFOSABI_ARM	     97	/* ARM */
+#define ELFOSABI_NACL	    123	/* x86 NativeClient */
 #define ELFOSABI_STANDALONE 255	/* Standalone (embedded) application */
 
 #define EI_ABIVERSION	8	/* ABI version */

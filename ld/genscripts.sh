@@ -418,9 +418,10 @@ if test -n "$GENERATE_AUTO_IMPORT_SCRIPT"; then
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xa
 fi
 
-case " $EMULATION_LIBPATH " in
-    *" ${EMULATION_NAME} "*) COMPILE_IN=true;;
-esac
+# Disable compiling-in of linker scripts.
+# case " $EMULATION_LIBPATH " in
+#     *" ${EMULATION_NAME} "*) COMPILE_IN=true;;
+# esac
 
 # PR ld/5652:
 # Determine if the shell has support for the variable BASH_LINENO.

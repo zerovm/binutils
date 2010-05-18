@@ -159,6 +159,8 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
 
   fixP = (fixS *) obstack_alloc (&notes, sizeof (fixS));
 
+  frag->nacl_fixup = fixP;
+
   fixP->fx_frag = frag;
   fixP->fx_where = where;
   fixP->fx_size = size;
@@ -431,6 +433,38 @@ chain_frchains_together (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static void
+move_call_insn_to_end(fragS *fragP, fragS *next ATTRIBUTE_UNUSED)
+{
+  if (fragP->fr_offset != 0) {
+    // fragP->fr_fix is the start of the fixup code (i.e. nops).
+    int i;
+    unsigned char *tmp = alloca (fragP->fr_fix);
+    memcpy (tmp, fragP->fr_literal, fragP->fr_fix);
+    for (i = 0; i < fragP->fr_var; i++) {
+      fragP->fr_literal[i] = fragP->fr_literal[fragP->fr_fix+i];
+    }
+    for (i = 0; i< fragP->fr_fix; i++) {
+      fragP->fr_literal[fragP->fr_var+i] = tmp[i];
+    }
+    // TODO(sehr): this code should be obsolete.  Remove it.
+    // If it was a direct call, there's a fixup for the target address.
+    // This needs to corrected to point to the new location of the
+    // constant after we moved the nops.
+    // If there is no fixup, but this is a call, then it is an indirect
+    // call, and we need to put in the fixups for the sandbox code.
+    if (fragP->nacl_fixup) {
+      fragP->nacl_fixup->fx_where += fragP->fr_var;
+    }
+    else if (getenv("NACL_CONTROL_ENFORCE_RANGE")) {
+      symbolS* and_mask = symbol_find_or_make ("__nacl_and_mask");
+      symbolS* exec_start = symbol_find_or_make ("__executable_start");
+      fix_new (fragP, 2+fragP->fr_var, 4, and_mask, 0, 0, BFD_RELOC_32);
+      fix_new (fragP, 8+fragP->fr_var, 4, exec_start, 0, 0, BFD_RELOC_32);
+    }
+  }
+}
+
+static void
 cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
 {
   switch (fragP->fr_type)
@@ -454,6 +488,10 @@ cvt_frag_to_fill (segT sec ATTRIBUTE_UNUSED, fragS *fragP)
 			(long) fragP->fr_offset);
 	  fragP->fr_offset = 0;
 	}
+
+      if (fragP->is_call && (nacl_alignment > 0)) {
+        move_call_insn_to_end (fragP, NULL);
+      }
       fragP->fr_type = rs_fill;
       break;
 
@@ -1186,6 +1224,8 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     {
       int j;
       int fx_size, slack;
+      /* NativeClient change here to handle moving calls. */
+      int limitsize;
       offsetT loc;
 
       if (fixp->fx_done)
@@ -1196,7 +1236,10 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
       if (slack > 0)
 	fx_size = fx_size > slack ? fx_size - slack : 0;
       loc = fixp->fx_where + fx_size;
-      if (slack >= 0 && loc > fixp->fx_frag->fr_fix)
+      limitsize = (fixp->fx_frag->is_call ?
+                   (fixp->fx_frag->fr_fix + fixp->fx_frag->fr_var) :
+                   fixp->fx_frag->fr_fix);
+      if (slack >= 0 && loc > limitsize)
 	as_bad_where (fixp->fx_file, fixp->fx_line,
 		      _("internal error: fixup not contained within frag"));
 

@@ -46,6 +46,8 @@
 static void exp_fold_tree_1 (etree_type *);
 static void exp_fold_tree_no_dot (etree_type *);
 static bfd_vma align_n (bfd_vma, bfd_vma);
+static bfd_vma ceilp2 (bfd_vma);
+static bfd_vma nacl_mask (bfd_vma);
 
 segment_type *segments;
 
@@ -268,6 +270,20 @@ fold_unary (etree_type *tree)
 		  expld.dataseg.end = expld.result.value;
 		}
 	    }
+	  else
+	    expld.result.valid_p = FALSE;
+	  break;
+
+	case CEILP2:
+	  if (expld.phase != lang_first_phase_enum)
+	    expld.result.value = ceilp2 (expld.result.value);
+	  else
+	    expld.result.valid_p = FALSE;
+	  break;
+
+	case NACL_MASK:
+	  if (expld.phase != lang_first_phase_enum)
+	    expld.result.value = nacl_mask (expld.result.value);
 	  else
 	    expld.result.valid_p = FALSE;
 	  break;
@@ -1160,4 +1176,28 @@ align_n (bfd_vma value, bfd_vma align)
 
   value = (value + align - 1) / align;
   return value * align;
+}
+
+static bfd_vma
+ceilp2 (bfd_vma value)
+{
+  value |= (value >> 1);
+  value |= (value >> 2);
+  value |= (value >> 4);
+  value |= (value >> 8);
+  value |= (value >> 16);
+  return value + 1;
+}
+
+static bfd_vma
+nacl_mask (bfd_vma value)
+{
+  char* str = getenv ("NACL_CONTROL_ENFORCE_ALIGN");
+  if (str) {
+    int nacl_alignment = atoi (str);
+    return (value - 1) & ~((1 << nacl_alignment) - 1);
+  }
+  else {
+    return value - 1;
+  }
 }

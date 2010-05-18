@@ -559,7 +559,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  else if (!got_a_float)
 	    {
 	      if (flag_code == CODE_16BIT)
-		add_prefix (DATA_PREFIX_OPCODE);
+		add_prefix (DATA_PREFIX_OPCODE, 1);
 	      suffix = LONG_DOUBLE_MNEM_SUFFIX;
 	    }
 	  else

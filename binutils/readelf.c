@@ -2462,6 +2462,7 @@ get_osabi_name (unsigned int osabi)
     case ELFOSABI_AROS:		return "AROS";
     case ELFOSABI_STANDALONE:	return _("Standalone App");
     case ELFOSABI_ARM:		return "ARM";
+    case ELFOSABI_NACL:		return "NativeClient";
     default:
       snprintf (buff, sizeof (buff), _("<unknown: %x>"), osabi);
       return buff;
