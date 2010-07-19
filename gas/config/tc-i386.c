@@ -5987,6 +5987,22 @@ check_prefix:
 	    /*                    esp   mov   mov
 				        reg   imm  */
 	    insert_xp_sandbox_code (4, 0x89, 0xbc, insn_start_off);
+	  else if (!strcmp(i.tm.name, "naclrestsp_noflags")) {
+	    /*                    esp   mov   mov
+				        reg   imm  */
+	    // Generate the mov from src into esp first.
+	    insert_xp_sandbox_code (4, 0x89, 0xbc, insn_start_off);
+	    // Now set it up to restore rsp with lea (%rsp,%r15,1), %rsp --
+	    // overriding the add instruction that insert_xp_sandbox_code
+	    // set up to restore rsp.
+	    i.prefix[REX_PREFIX] = 0x40 | REX_W | REX_X;
+	    i.sib.base = 4;   // %rsp
+	    i.sib.index = 7;  // %r15
+	    i.sib.scale = 0;
+	    i.rm.mode = 0;
+	    i.rm.reg = 4;
+	    // opcode comes from the .tbl file (no need to override)
+	  }
 
 	  /* The prefix bytes.  */
 	  for (j = ARRAY_SIZE (i.prefix), q = i.prefix; j > 0; j--, q++)

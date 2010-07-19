@@ -224,6 +224,7 @@ naclspadj, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Imm8S, Reg64 }
 naclspadj, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Imm32S, Reg64 }
 naclrestbp, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp32S|Reg32, Reg64 }
 naclrestsp, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp32S|Reg32, Reg64 }
+naclrestsp_noflags, 2, 0x8d, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp32S|Reg32, Reg64 }
 
 // Native client string operations
 cmps, 3, 0xa6, None, 1, Cpu64, W|No_sSuf|No_ldSuf|IsString, { Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|EsSeg, Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg64 }
