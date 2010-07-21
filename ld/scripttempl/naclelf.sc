@@ -101,11 +101,11 @@ test -n "$CREATE_SHLIB$CREATE_PIE" && test -n "$SHLIB_DATA_ADDR" && COMMONPAGESI
 test -z "$CREATE_SHLIB$CREATE_PIE" && test -n "$DATA_ADDR" && COMMONPAGESIZE=""
 test -n "$RELRO_NOW" && unset SEPARATE_GOTPLT
 test -z "$ATTRS_SECTIONS" && ATTRS_SECTIONS=".gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }"
-DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE}) + (. & (${MAXPAGESIZE} - 1))"
+DATA_SEGMENT_ALIGN="ALIGN(${SEGMENT_SIZE}) + (. & (${COMMONPAGESIZE} - 1))"
 DATA_SEGMENT_RELRO_END=""
 DATA_SEGMENT_END=""
 if test -n "${COMMONPAGESIZE}"; then
-  DATA_SEGMENT_ALIGN="ALIGN (${SEGMENT_SIZE}) - ((${MAXPAGESIZE} - .) & (${MAXPAGESIZE} - 1)); . = DATA_SEGMENT_ALIGN (${MAXPAGESIZE}, ${COMMONPAGESIZE})"
+  DATA_SEGMENT_ALIGN="ALIGN (${SEGMENT_SIZE}) - ((${COMMONPAGESIZE} - .) & (${COMMONPAGESIZE} - 1)); . = DATA_SEGMENT_ALIGN (${COMMONPAGESIZE}, ${COMMONPAGESIZE})"
   DATA_SEGMENT_END=". = DATA_SEGMENT_END (.);"
   DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT-0}, .);"
 fi
@@ -191,11 +191,11 @@ test "${LARGE_SECTIONS}" = "yes" && OTHER_BSS_SECTIONS="
     *(LARGE_COMMON)
   }"
 test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
-  .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${COMMONPAGESIZE}) + (. & (${COMMONPAGESIZE} - 1))} :
   {
     *(.lrodata${RELOCATING+ .lrodata.* .gnu.linkonce.lr.*})
   }
-  .ldata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  .ldata ${RELOCATING-0} ${RELOCATING+ALIGN(${COMMONPAGESIZE}) + (. & (${COMMONPAGESIZE} - 1))} :
   {
     *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
     ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
@@ -421,7 +421,7 @@ cat <<EOF
                           DEFINED (__executable_start) ?
                             NACL_MASK (. - __executable_start) : 0xffffffff);}
   . = . + 32; /* reserve space for HLTs */
-  . = ALIGN(CONSTANT (MAXPAGESIZE)); /* nacl wants page alignment */
+  . = ALIGN(CONSTANT (COMMONPAGESIZE)); /* nacl wants page alignment */
   ${WRITABLE_RODATA-${RODATA}} :rodata
   .rodata1      ${RELOCATING-0} : { *(.rodata1) }
   .nacl_rpc_methods : { *(.nacl_rpc_methods) }
@@ -494,7 +494,7 @@ cat <<EOF
 
   ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 
-  ${RELOCATING+. = ALIGN(${MAXPAGESIZE});} /* nacl wants page alignment */
+  ${RELOCATING+. = ALIGN(${COMMONPAGESIZE});} /* nacl wants page alignment */
   .data         ${RELOCATING-0} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}

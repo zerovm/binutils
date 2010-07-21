@@ -9111,13 +9111,7 @@ handle_large_common (int small ATTRIBUTE_UNUSED)
 void nacl_elf_final_processing(void)
 {
   elf_elfheader (stdoutput)->e_ident[EI_OSABI] = ELFOSABI_NACL;
-  if (flag_code == CODE_64BIT)
-    {
-      /* Until we reach a stable version on x86-64, leave it as zero. */
-      elf_elfheader (stdoutput)->e_ident[EI_ABIVERSION] = 0;
-    }
-  else
-    elf_elfheader (stdoutput)->e_ident[EI_ABIVERSION] = EF_NACL_ABIVERSION;
+  elf_elfheader (stdoutput)->e_ident[EI_ABIVERSION] = EF_NACL_ABIVERSION;
 
   elf_elfheader (stdoutput)->e_flags &= ~EF_NACL_ALIGN_MASK;
   if (nacl_library_mode)
