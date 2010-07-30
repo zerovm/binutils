@@ -4017,6 +4017,7 @@ check_reverse:
 		     register consistency between operands 2 and 3.  */
 		  if (!operand_type_match (overlap2, i.types[2])
 		      || (check_register
+			  && !t->opcode_modifier.isstring
 			  && !operand_type_register_match (overlap1,
 							   i.types[1],
 							   operand_types[1],
