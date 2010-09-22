@@ -1322,6 +1322,14 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
   if (from_type == to_type)
     return TRUE;
 
+#ifdef ELF32_NACL_C
+  /* Don't attempt to rewrite code sequences with call in the middle,
+     because the NaCl assembler will put no-ops before the call,
+     which we can't handle yet.  */
+  if (from_type == R_386_TLS_GD || from_type == R_386_TLS_LDM)
+    return TRUE;
+#endif
+
   /* Check if the transition can be performed.  */
   if (check
       && ! elf_i386_check_tls_transition (abfd, sec, contents,
