@@ -3292,10 +3292,18 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			  sindx = elf_section_data (osec)->dynindx;
 			  if (sindx == 0)
 			    {
-			      asection *oi = htab->elf.text_index_section;
-			      sindx = elf_section_data (oi)->dynindx;
+			      osec = htab->elf.text_index_section;
+			      sindx = elf_section_data (osec)->dynindx;
 			    }
 			  BFD_ASSERT (sindx != 0);
+#ifdef ELF64_NACL_C
+			  /* For NaCl, R_X86_64_32 comes in place of
+			     R_X86_64_64. We don't have R_X86_32_RELATIVE to
+			     make a rewrite similar to one above, so just make
+			     a non-buggy relocation against section symbol.  */
+			  if (r_type == R_X86_64_32)
+			    relocation -= osec->vma;
+#endif
 			}
 
 		      outrel.r_info = ELF64_R_INFO (sindx, r_type);
