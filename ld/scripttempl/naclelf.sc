@@ -121,7 +121,7 @@ if test -z "$GOT"; then
     GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.igot.plt) *(.got) *(.igot) }"
   else
     GOT=".got          ${RELOCATING-0} : { *(.got) *(.igot) }"
-    GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt)  *(.igot.plt) }"
+    GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt)  *(.igot.plt) } :data"
   fi
 fi
 DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
@@ -490,11 +490,10 @@ cat <<EOF
   ${DATA_GOT+${RELRO_NOW-${SEPARATE_GOTPLT+${GOT}}}}
   ${RELOCATING+${DATA_SEGMENT_RELRO_END}}
   ${DATA_GOT+${RELRO_NOW-${SEPARATE_GOTPLT-${GOT}}}}
+  ${RELOCATING+. = ALIGN(${COMMONPAGESIZE});} /* nacl wants page alignment */
   ${DATA_GOT+${RELRO_NOW-${GOTPLT}}}
-
   ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 
-  ${RELOCATING+. = ALIGN(${COMMONPAGESIZE});} /* nacl wants page alignment */
   .data         ${RELOCATING-0} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
