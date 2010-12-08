@@ -222,7 +222,9 @@ naclssp, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Imm32S, Reg64 }
 naclssp, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp32S|Reg32, Reg64 }
 naclspadj, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Imm8S, Reg64 }
 naclspadj, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Imm32S, Reg64 }
+naclrestbp, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Imm32S, Reg64 }
 naclrestbp, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp32S|Reg32, Reg64 }
+naclrestsp, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Imm32S, Reg64 }
 naclrestsp, 2, 0x01, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp32S|Reg32, Reg64 }
 naclrestsp_noflags, 2, 0x8d, None, 1, Cpu64, W|Modrm|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp32S|Reg32, Reg64 }
 
