@@ -8716,6 +8716,25 @@ md_undefined_symbol (name)
 
 /* Round up a section size to the appropriate boundary.  */
 
+#ifdef TC_NACL_C
+valueT
+md_section_align (segment, size)
+     segT segment;
+     valueT size;
+{
+  if (bfd_get_section_flags (stdoutput, segment) & SEC_CODE)
+    {
+      /* For NaCl, force the code section size to be aligned. This implies
+	 padding with NOPs that is required for validation.  */
+      int align;
+
+      align = bfd_get_section_alignment (stdoutput, segment);
+      size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+    }
+
+  return size;
+}
+#else
 valueT
 md_section_align (segment, size)
      segT segment ATTRIBUTE_UNUSED;
@@ -8738,6 +8757,7 @@ md_section_align (segment, size)
 
   return size;
 }
+#endif
 
 /* On the i386, PC-relative offsets are relative to the start of the
    next instruction.  That is, the address of the offset, plus its
