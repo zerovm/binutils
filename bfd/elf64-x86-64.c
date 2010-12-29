@@ -949,6 +949,17 @@ elf64_x86_64_check_tls_transition (bfd *abfd, asection *sec,
 			   "__tls_get_addr", 14) == 0));
 
     case R_X86_64_GOTTPOFF:
+#ifdef ELF64_NACL_C
+      /* Check transition from IE access model:
+		movl foo@gottpoff(%rip), %reg
+		addl foo@gottpoff(%rip), %reg
+	 The encoding is similar to x86_64 but with 0x44 REX prefix if writing
+	 to %r9d-%r15d or without REX prefix otherwise. We can't distinguish
+	 cases with/without the prefix, thus disabling the prefix check :-(  */
+
+      if (offset < 2 || (offset + 4) > sec->size)
+	return FALSE;
+#else
       /* Check transition from IE access model:
 		movq foo@gottpoff(%rip), %reg
 		addq foo@gottpoff(%rip), %reg
@@ -960,6 +971,7 @@ elf64_x86_64_check_tls_transition (bfd *abfd, asection *sec,
       val = bfd_get_8 (abfd, contents + offset - 3);
       if (val != 0x48 && val != 0x4c)
 	return FALSE;
+#endif
 
       val = bfd_get_8 (abfd, contents + offset - 2);
       if (val != 0x8b && val != 0x03)
