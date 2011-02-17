@@ -415,11 +415,6 @@ cat <<EOF
   ${RELOCATING+PROVIDE (__${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (_${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (${ETEXT_NAME} = .);}
-  ${RELOCATING+. = DEFINED (__executable_start) ? 
-                     ALIGN(CEILP2(. - __executable_start)) : .;}
-  ${RELOCATING+PROVIDE (__nacl_and_mask =
-                          DEFINED (__executable_start) ?
-                            NACL_MASK (. - __executable_start) : 0xffffffff);}
   . = . + 32; /* reserve space for HLTs */
   . = ALIGN(CONSTANT (COMMONPAGESIZE)); /* nacl wants page alignment */
   ${WRITABLE_RODATA-${RODATA}} :rodata
