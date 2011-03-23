@@ -1305,7 +1305,9 @@ $(srcdir)/i386-tbl.h: $(srcdir)/i386-init.h
 	@echo $@
 
 $(srcdir)/i386-init.h: i386-gen$(EXEEXT_FOR_BUILD) i386-opc.tbl i386-reg.tbl
-	./i386-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir)
+	# Native Client sandbox does not allow chdir, so we chdir for i386-gen
+	# instead of using --srcdir.
+	d=`pwd` && cd $(srcdir) && $$d/i386-gen$(EXEEXT_FOR_BUILD)
 
 i386-opc.lo: $(srcdir)/i386-tbl.h
 
