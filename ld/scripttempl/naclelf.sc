@@ -416,6 +416,7 @@ cat <<EOF
   ${RELOCATING+PROVIDE (_${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (${ETEXT_NAME} = .);}
   . = . + 32; /* reserve space for HLTs */
+  . = DEFINED(__nacl_rodata_start) ? __nacl_rodata_start : .;
   . = ALIGN(CONSTANT (COMMONPAGESIZE)); /* nacl wants page alignment */
   ${WRITABLE_RODATA-${RODATA}} :rodata
   .rodata1      ${RELOCATING-0} : { *(.rodata1) }
