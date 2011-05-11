@@ -4524,11 +4524,12 @@ static const struct bfd_elf_special_section
 #endif
 #define ELF_ARCH			    bfd_arch_i386
 #define ELF_MACHINE_CODE		    EM_X86_64
-#define ELF_MAXPAGESIZE			    0x200000
 #ifdef ELF64_NACL_C
+#define ELF_MAXPAGESIZE			    0x10000
 #define ELF_MINPAGESIZE			    0x10000
 #define ELF_COMMONPAGESIZE		    0x10000
 #else
+#define ELF_MAXPAGESIZE			    0x200000
 #define ELF_MINPAGESIZE			    0x1000
 #define ELF_COMMONPAGESIZE		    0x1000
 #endif
