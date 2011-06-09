@@ -299,10 +299,7 @@ void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
 
 /* NativeClient specific additions. */
 
-/* log2 of the instruction alignment */
-extern int nacl_alignment;
-
-/* library mode: 16-byte alignment, calls end 32-byte chunks. */
-extern int nacl_library_mode;
+/* log2 of the instruction alignment.  */
+extern const int nacl_alignment;
 
 #endif /* TC_I386 */

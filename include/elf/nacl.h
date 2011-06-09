@@ -23,7 +23,6 @@
 
 /* e_flags settings for NativeClient. */
 #define EF_NACL_ALIGN_MASK  0x300000	/* bits indicating alignment */
-#define EF_NACL_ALIGN_16    0x100000	/* aligned zero mod 16 */
 #define EF_NACL_ALIGN_32    0x200000	/* aligned zero mod 32 */ 
 #define EF_NACL_ALIGN_LIB   0x000000	/* aligned to pass either way */
 

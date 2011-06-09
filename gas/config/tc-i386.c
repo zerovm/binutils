@@ -466,12 +466,7 @@ unsigned int x86_dwarf2_return_column;
 int x86_cie_data_alignment;
 
 /* NativeClient support */
-
-/* Default alignment.  0=OFF */
-int nacl_alignment = NACL_ALIGN_POW2;
-
-/* Use library mode.  0=OFF */
-int nacl_library_mode = 0;
+const int nacl_alignment = 5;
 
 /* Interface to relax_segment.
    There are 3 major relax states for 386 jump insns because the
@@ -2143,7 +2138,6 @@ void
 nativeclient_symbol_init ()
 {
   symbolS *symbolP;
-  int entry_align;
 
   /*
    * A symbol conveying the setting of nacl_alignment to assembler writers.
@@ -2153,17 +2147,11 @@ nativeclient_symbol_init ()
   symbol_table_insert (symbolP);
 
   /*
-   * A symbol conveying the function entry alignment.  This differs from
-   * NACLALIGN in library mode.
+   * A symbol conveying the function entry alignment.  Left here for backwards
+   * compatibility with old assembly sources.
    */
-  if (nacl_library_mode) {
-    entry_align = 5;
-  }
-  else {
-    entry_align = nacl_alignment;
-  }
   symbolP = symbol_new ("NACLENTRYALIGN", absolute_section,
-			(valueT) entry_align, &zero_address_frag);
+			(valueT) nacl_alignment, &zero_address_frag);
   symbol_table_insert (symbolP);
 }
 
@@ -6117,29 +6105,12 @@ check_prefix:
    * instruction as fill.
    */
   if (nacl_alignment > 0) {
-    int align_base;
-    int call_align;
     int instrsize = (int) frag_now_fix ();
-
-    /*
-     * "library mode" enables compatible library builds for either 16 or
-     * 32 byte alignment.  Using the strictest alignment requirement for
-     * instructions makes them 0mod16 aligned.  Calls need to end a 32 byte
-     * region.
-     */
-    if (nacl_library_mode) {
-      align_base = 4;
-      call_align = 5;
-    }
-    else {
-      align_base = nacl_alignment;
-      call_align = nacl_alignment;
-    }
 
     switch (instrsize) {
       case 0:
         // We get zero size for jump instructions.  Go to their biggest.
-        insn_start_frag->fr_offset = align_base;
+        insn_start_frag->fr_offset = nacl_alignment;
         insn_start_frag->fr_subtype = 5;
         break;
 
@@ -6149,7 +6120,7 @@ check_prefix:
           // rep and lock refixes are treated as separate instructions.
           // I don't know any other patch but to force an alignment to 0,
           // i.e., waste as many bytes as it takes.
-          insn_start_frag->fr_offset = align_base;
+          insn_start_frag->fr_offset = nacl_alignment;
           insn_start_frag->fr_subtype = 0;
         }
         else {
@@ -6161,21 +6132,21 @@ check_prefix:
 
       default:
         // Don't use more than size-1 bytes to pad.
-        insn_start_frag->fr_offset = align_base;
+        insn_start_frag->fr_offset = nacl_alignment;
         insn_start_frag->fr_subtype = instrsize-1;
         break;
     }
 
 
     /*
-     * Calls need to fall at the end of a (1 << call_align) region.  We
+     * Calls need to fall at the end of a (1 << nacl_alignment) region.  We
      * make sure there are no instructions after the call until the next
      * alignment.  During writing of the object we swap the nops before the
      * instruction.
      */
     if (frag_is_a_call ()) {
       frag_now->is_call = 1;
-      frag_align_code (call_align,0);
+      frag_align_code (nacl_alignment,0);
     }
   }
 }
@@ -8227,8 +8198,6 @@ const char *md_shortopts = "qn";
 #define OPTION_MOLD_GCC (OPTION_MD_BASE + 9)
 #define OPTION_MSSE2AVX (OPTION_MD_BASE + 10)
 #define OPTION_MSSE_CHECK (OPTION_MD_BASE + 11)
-#define OPTION_NACL_ALIGN (OPTION_MD_BASE + 12)
-#define OPTION_NACL_LIBRARY_MODE (OPTION_MD_BASE + 13)
 
 struct option md_longopts[] =
 {
@@ -8247,8 +8216,6 @@ struct option md_longopts[] =
   {"mold-gcc", no_argument, NULL, OPTION_MOLD_GCC},
   {"msse2avx", no_argument, NULL, OPTION_MSSE2AVX},
   {"msse-check", required_argument, NULL, OPTION_MSSE_CHECK},
-  {"nacl-align", required_argument, NULL, OPTION_NACL_ALIGN},
-  {"nacl-library-mode", no_argument, NULL, OPTION_NACL_LIBRARY_MODE},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -8458,20 +8425,6 @@ md_parse_option (int c, char *arg)
       else
 	as_fatal (_("Invalid -msse-check= option: `%s'"), arg);
       break;
-
-    case OPTION_NACL_ALIGN:
-      {
-        nacl_alignment = atoi (optarg);
-        if (nacl_alignment < 0)
-          as_fatal (_("--nacl-align needs a non-negative argument"));
-        break;
-      }
-
-    case OPTION_NACL_LIBRARY_MODE:
-      {
-        nacl_library_mode = 1;
-        break;
-      }
 
     default:
       return 0;
@@ -9144,12 +9097,7 @@ void nacl_elf_final_processing(void)
   elf_elfheader (stdoutput)->e_ident[EI_ABIVERSION] = EF_NACL_ABIVERSION;
 
   elf_elfheader (stdoutput)->e_flags &= ~EF_NACL_ALIGN_MASK;
-  if (nacl_library_mode)
-    elf_elfheader (stdoutput)->e_flags |= EF_NACL_ALIGN_LIB;
-  else if (nacl_alignment == 4)
-    elf_elfheader (stdoutput)->e_flags |= EF_NACL_ALIGN_16;
-  else if (nacl_alignment == 5)
-    elf_elfheader (stdoutput)->e_flags |= EF_NACL_ALIGN_32;
+  elf_elfheader (stdoutput)->e_flags |= EF_NACL_ALIGN_32;
 }
 #endif
 #endif /* OBJ_ELF || OBJ_MAYBE_ELF */
