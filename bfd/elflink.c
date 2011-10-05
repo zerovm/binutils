@@ -4437,7 +4437,7 @@ error_free_dyn:
 	      if ((elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: invalid DSO for symbol `%s' definition"),
+		    (_("%B: invalid DSO for symbol `%s' definition"),
 		     abfd, name);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_free_vers;
