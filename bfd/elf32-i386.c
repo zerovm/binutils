@@ -1102,6 +1102,9 @@ elf_i386_check_tls_transition (bfd *abfd, asection *sec,
       if (offset < 2 || (rel + 1) >= relend)
 	return FALSE;
 
+#ifdef ELF32_NACL_C
+      /* HACK: we hope for the best and check nothing!  */
+#else
       type = bfd_get_8 (abfd, contents + offset - 2);
       if (r_type == R_386_TLS_GD)
 	{
@@ -1151,6 +1154,7 @@ elf_i386_check_tls_transition (bfd *abfd, asection *sec,
 
       if (bfd_get_8 (abfd, contents + offset + 4) != 0xe8)
 	return FALSE;
+#endif
 
       r_symndx = ELF32_R_SYM (rel[1].r_info);
       if (r_symndx < symtab_hdr->sh_info)
@@ -1321,14 +1325,6 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
   /* Return TRUE if there is no transition.  */
   if (from_type == to_type)
     return TRUE;
-
-#ifdef ELF32_NACL_C
-  /* Don't attempt to rewrite code sequences with call in the middle,
-     because the NaCl assembler will put no-ops before the call,
-     which we can't handle yet.  */
-  if (from_type == R_386_TLS_GD || from_type == R_386_TLS_LDM)
-    return TRUE;
-#endif
 
   /* Check if the transition can be performed.  */
   if (check
@@ -3535,9 +3531,27 @@ elf_i386_relocate_section (bfd *output_bfd,
 			 Change it into:
 			 movl %gs:0, %eax; subl $foo@tpoff, %eax
 			 (6 byte form of subl).  */
+#ifdef ELF32_NACL_C
+		      /* Replace lea with movl.  */
+		      memcpy (contents + rel->r_offset - 3,
+			      "\x65\xa1\0\0\0\0", 6);
+		      /* Call is 5 bytes, bundle ends right after the call.
+			 Replace call with one preceeding byte with 6 byte subl,
+			 so that subl does not cross bundle boundary.  */
+		      memcpy (contents + rel[1].r_offset - 2,
+			      "\x81\xe8\0\0\0\0", 6);
+		      roff = rel[1].r_offset;
+		      /* Write nops between movl and subl.  */
+		      {
+			bfd_vma i = rel->r_offset + 3;
+			for (; i < rel[1].r_offset - 2; ++i)
+			  bfd_put_8 (output_bfd, 0x90, contents + i);
+		      }
+#else
 		      memcpy (contents + rel->r_offset - 3,
 			      "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
 		      roff = rel->r_offset + 5;
+#endif
 		    }
 		  else
 		    {
@@ -3545,9 +3559,17 @@ elf_i386_relocate_section (bfd *output_bfd,
 			 Change it into:
 			 movl %gs:0, %eax; subl $foo@tpoff, %eax
 			 (6 byte form of subl).  */
+#ifdef ELF32_NACL_C
+		      /* We might be unable to rewrite this one. With properly
+			 aligned call, subl will cross bundle boundary if no
+			 nops in between.
+			 TODO: detect this in elf_i386_check_tls_transition.  */
+		      BFD_ASSERT (FALSE);
+#else
 		      memcpy (contents + rel->r_offset - 2,
 			      "\x65\xa1\0\0\0\0\x81\xe8\0\0\0", 12);
 		      roff = rel->r_offset + 6;
+#endif
 		    }
 		  bfd_put_32 (output_bfd, elf_i386_tpoff (info, relocation),
 			      contents + roff);
@@ -3869,6 +3891,44 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      /* GD->IE transition.  */
 	      type = bfd_get_8 (input_bfd, contents + rel->r_offset - 2);
 	      val = bfd_get_8 (input_bfd, contents + rel->r_offset - 1);
+#ifdef ELF32_NACL_C
+	      if (type == 0x04)
+		{
+		  /* leal foo(,%reg,1), %eax; call ___tls_get_addr
+		     Change it into:
+		     movl %gs:0, %eax; subl $foo@gottpoff(%reg), %eax.  */
+
+		  /* Replace lea with movl.  */
+		  memcpy (contents + rel->r_offset - 3,
+			  "\x65\xa1\0\0\0\0", 6);
+		  /* Call is 5 bytes, bundle ends right after the call.
+		     Replace call with one preceeding byte with 6 byte subl,
+		     so that subl does not cross bundle boundary.  */
+		  memcpy (contents + rel[1].r_offset - 2,
+			  "\x2b\x80\0\0\0\0", 6);
+		  contents[rel[1].r_offset - 1] = 0x80 | ((val >> 3) & 7);
+		  /* Set roff + 8 to point to relocation target.  */
+		  roff = rel[1].r_offset - 8;
+		  /* Write nops between movl and subl.  */
+		  {
+		    bfd_vma i = rel->r_offset + 3;
+		    for (; i < rel[1].r_offset - 2; ++i)
+		      bfd_put_8 (output_bfd, 0x90, contents + i);
+		  }
+		}
+	      else
+		{
+		  /* leal foo(%reg), %eax; call ___tls_get_addr; nop
+		     Change it into:
+		     movl %gs:0, %eax; subl $foo@gottpoff(%reg), %eax.  */
+
+		  /* We might be unable to rewrite this one. With properly
+		     aligned call, subl will cross bundle boundary if no
+		     nops in between.
+		     TODO: detect this in elf_i386_check_tls_transition.  */
+		  BFD_ASSERT (FALSE);
+		}
+#else
 	      if (type == 0x04)
 		{
 		  /* leal foo(,%reg,1), %eax; call ___tls_get_addr
@@ -3887,6 +3947,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      memcpy (contents + roff,
 		      "\x65\xa1\0\0\0\0\x2b\x80\0\0\0", 12);
 	      contents[roff + 7] = 0x80 | (val & 7);
+#endif
 	      /* If foo is used only with foo@gotntpoff(%reg) and
 		 foo@indntpoff, but not with foo@gottpoff(%reg), change
 		 subl $foo@gottpoff(%reg), %eax
@@ -3995,8 +4056,17 @@ elf_i386_relocate_section (bfd *output_bfd,
 		 We change it into:
 		 movl %gs:0, %eax; nop; leal 0(%esi,1), %esi.  */
 	      BFD_ASSERT (r_type == R_386_TLS_LE_32);
+#ifdef ELF32_NACL_C
+	      /* Replace lea with movl.  */
+	      memcpy (contents + rel->r_offset - 2,
+		      "\x65\xa1\0\0\0\0", 6);
+	      /* Replace call with nop.  */
+	      memcpy (contents + rel[1].r_offset - 1,
+		      "\x0f\x1f\x44\0\0", 5);
+#else
 	      memcpy (contents + rel->r_offset - 2,
 		      "\x65\xa1\0\0\0\0\x90\x8d\x74\x26", 11);
+#endif
 	      /* Skip R_386_PC32/R_386_PLT32.  */
 	      rel++;
 	      continue;
