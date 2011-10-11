@@ -4704,17 +4704,21 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      && (p->p_type != PT_NOTE
 		  || bfd_get_format (abfd) != bfd_core))
 	    {
-	      Elf_Internal_Shdr *hdr;
-	      asection *sect;
-
 	      BFD_ASSERT (!m->includes_filehdr && !m->includes_phdrs);
 
-	      sect = m->sections[m->count - 1];
-	      hdr = &elf_section_data (sect)->this_hdr;
-	      p->p_filesz = sect->filepos - m->sections[0]->filepos;
-	      if (hdr->sh_type != SHT_NOBITS)
-		p->p_filesz += hdr->sh_size;
+	      p->p_filesz = 0;
 	      p->p_offset = m->sections[0]->filepos;
+	      for (i = m->count; i-- != 0;)
+		{
+		  asection *sect = m->sections[i];
+		  Elf_Internal_Shdr *hdr = &elf_section_data (sect)->this_hdr;
+		  if (hdr->sh_type != SHT_NOBITS)
+		    {
+		      p->p_filesz = (sect->filepos - m->sections[0]->filepos
+				     + hdr->sh_size);
+		      break;
+		    }
+		}
 	    }
 	}
       else if (m->includes_filehdr)

@@ -1,3 +1,10 @@
+2011-05-21  Alan Modra  <amodra@gmail.com>
+
+	PR 12763
+	* elf.c
+	(assign_file_positions_for_non_load_sections): Don't set p_filesz
+	from SHT_NOBITS section filepos.
+
 2010-03-03  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.am (RELEASE): Unset.
