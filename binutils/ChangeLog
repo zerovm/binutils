@@ -1,3 +1,18 @@
+2011-12-20  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.in (--enable-deterministic-archives): Grok new
+	argument.  Set DEFAULT_AR_DETERMINISTIC to 1 or 0 accordingly.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* ar.c (deterministic): Initialize to -1.
+	(main): Grok U option.
+	(usage): Mention U; say for D and U which is the default.
+	(default_deterministic): New function.
+	(main): Likewise.  Make newer_only && deterministic error
+	non-fatal if it was just DEFAULT_AR_DETERMINISTIC and not the D option.
+	* doc/binutils.texi (ar cmdline, ranlib): Document U modifier and
+	--enable-deterministic-archives behavior.
+
 2010-02-05  Christophe Lyon  <christophe.lyon@st.com>
 
 	* objdump.c (disassemble_bytes): Clear aux->reloc before printing
