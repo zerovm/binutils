@@ -123,6 +123,12 @@
 	optimized away.
 	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
 
+2009-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* acinclude.m4: Add include of ../config/zlib.m4.
+	* configure.in: AM_ZLIB to check for zlib support.
+	* configure: Regenerate.
+
 2009-11-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf32-spu.c (struct spu_link_hash_table): Remove overlay_fixed,

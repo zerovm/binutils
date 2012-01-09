@@ -1,3 +1,8 @@
+2012-01-09  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.in: Use AM_ZLIB.
+	* configure: Regenerated.
+
 2011-12-20  Roland McGrath  <mcgrathr@google.com>
 
 	* configure.in (--enable-deterministic-archives): Grok new

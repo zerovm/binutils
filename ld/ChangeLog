@@ -1,3 +1,8 @@
+2012-01-09  Roland McGrath  <mcgrathr@google.com>
+
+	* configure.in: Use AM_ZLIB.
+	* configure: Regenerated.
+
 2010-02-10  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* Makefile.am (CFILES): Add ldlex-wrapper.c.

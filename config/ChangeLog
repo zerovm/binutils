@@ -1,3 +1,7 @@
+2009-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* zlib.m4: New file.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* override.m4 (_GCC_AUTOCONF_VERSION): Bump to 2.64.
@@ -199,7 +203,7 @@
 
 	PR bootstrap/32009
 	* mh-ppc-darwin (BOOT_CFLAGS): Reenable.
-		
+
 2008-01-08  Jakub Jelinek  <jakub@redhat.com>
 
 	* futex.m4: New file.
@@ -273,7 +277,7 @@
 
 	* acx.m4 (ACX_CHECK_INSTALLED_TARGET_TOOL): Fixup logic for cross
 	builds.
-	
+
 2007-06-20  Mike Stump  <mrs@apple.com>
 
 	* acx.m4 (NCN_STRICT_CHECK_TARGET_TOOLS): Fix incremental builds.
@@ -298,7 +302,7 @@
 
 2007-04-11  Kai Tietz  <kai.tietz@onevision.com>
 
-	* stdint.m4: Make template compatible with older cygwin 
+	* stdint.m4: Make template compatible with older cygwin
 	types.h, wrapping each type in a __XXX_t_defined #ifdef.
 
 2007-03-26  H.J. Lu  <hongjiu.lu@intel.com>
@@ -1399,4 +1403,3 @@ Thu Jan 30 16:17:30 1992  Stu Grossman  (grossman at cygnus.com)
 Tue Dec 10 00:10:55 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* ChangeLog: fresh changelog.
-
