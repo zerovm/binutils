@@ -37,6 +37,8 @@
 #include "elf/nacl.h"
 #endif
 #include "opcodes/i386-init.h"
+#include "sb.h"
+#include "macro.h"
 
 #ifndef REGISTER_WARNINGS
 #define REGISTER_WARNINGS 1
@@ -1078,7 +1080,7 @@ i386_align_code (fragS *fragP, int count)
 	     ones.  Otherwise, we use a jump instruction and adjust
 	     its offset.   */
 	  int limit;
-	  
+
 	  /* For 64bit, the limit is 3 bytes.  */
 	  if (flag_code == CODE_64BIT
 	      && fragP->tc_frag_data.isa_flags.bitfield.cpulm)
@@ -1999,7 +2001,7 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
   if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_L1OM
       || new_flag.bitfield.cpul1om)
     return;
-  
+
   as_bad (_("`%s' is not supported on `%s'"), name, arch);
 #endif
 }
@@ -2134,6 +2136,33 @@ i386_mach ()
     as_fatal (_("Unknown architecture"));
 }
 
+/* This is a silly hack to predefine a macro without reading an input file.  */
+static int
+naclret_get_line (sb *sb)
+{
+  static const char *lines_32[] = {
+    "naclret",
+    "pop %ecx",
+    "nacljmp %ecx",
+    ".endm",
+    NULL
+  };
+  static const char *lines_64[] = {
+    "naclret",
+    "pop %r11",
+    "nacljmp %r11d, %r15",
+    ".endm",
+    NULL
+  };
+  static const char **next;
+  if (next == NULL)
+    next = flag_code == CODE_64BIT ? lines_64 : lines_32;
+  if (*next == NULL)
+    return 0;
+  sb_add_string (sb, *next++);
+  return '\n';
+}
+
 void
 nativeclient_symbol_init ()
 {
@@ -2153,6 +2182,16 @@ nativeclient_symbol_init ()
   symbolP = symbol_new ("NACLENTRYALIGN", absolute_section,
 			(valueT) nacl_alignment, &zero_address_frag);
   symbol_table_insert (symbolP);
+
+  {
+    sb s;
+    sb_new (&s);
+    naclret_get_line (&s);
+    const char *err = define_macro (0, &s, NULL, naclret_get_line,
+                                    "<built-in>", 0, NULL);
+    gas_assert (err == NULL);
+    sb_kill (&s);
+  }
 }
 
 void
@@ -4963,8 +5002,8 @@ build_modrm_byte (void)
       dest = i.operands - 1;
       nds = dest - 1;
 
-      /* This instruction must have 4 register operands 
-	 or 3 register operands plus 1 memory operand.  
+      /* This instruction must have 4 register operands
+	 or 3 register operands plus 1 memory operand.
 	 It must have VexNDS and VexImmExt.  */
       gas_assert ((i.reg_operands == 4
 		      || (i.reg_operands == 3 && i.mem_operands == 1))
@@ -4990,7 +5029,7 @@ build_modrm_byte (void)
 	{
 	  source = 1;
 	  reg = 0;
-	}      
+	}
       /* FMA4 swaps REG and NDS.  */
       if (i.tm.cpu_flags.bitfield.cpufma4)
 	{
@@ -4998,17 +5037,17 @@ build_modrm_byte (void)
 	  tmp = reg;
 	  reg = nds;
 	  nds = tmp;
-	}      
+	}
       gas_assert ((operand_type_equal (&i.tm.operand_types[reg], &regxmm)
 		   || operand_type_equal (&i.tm.operand_types[reg],
-					  &regymm)) 
+					  &regymm))
 		  && (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
-		      || operand_type_equal (&i.tm.operand_types[nds], 
+		      || operand_type_equal (&i.tm.operand_types[nds],
 					     &regymm)));
       exp->X_op = O_constant;
       exp->X_add_number
 	= ((i.op[reg].regs->reg_num
-	    + ((i.op[reg].regs->reg_flags & RegRex) ? 8 : 0)) << 4);      
+	    + ((i.op[reg].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
       i.vex.register_specifier = i.op[nds].regs;
     }
   else
@@ -7329,7 +7368,7 @@ i386_att_operand (char *operand_string)
         }
       else
 #endif
-        {      
+        {
           as_bad (_("bad register name `%s'"), op_string);
           return 0;
         }
